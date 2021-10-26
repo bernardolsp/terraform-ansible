@@ -1,0 +1,22 @@
+### Secrets ###
+*.pem
+/ssh.cfg
+/secrets.sh
+
+
+### Linux ###
+*~
+
+
+
+### Terraform ###
+# Compiled files
+*.tfstate
+*.tfstate.backup
+
+# Module directory
+.terraform/
+
+
+### Ansible ###
+*.retry
