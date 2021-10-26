@@ -1,0 +1,11 @@
+- hosts: all
+  become: yes
+  become_user: ubuntu
+
+  tasks:
+    - name: Checking the username
+      shell: /usr/bin/whoami
+      register: username
+
+    - name: Debugging the whoami username
+      debug: msg={{ username.stdout }}
