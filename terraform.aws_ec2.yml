@@ -1,8 +1,7 @@
 plugin: aws_ec2
 regions:
   - us-east-1
-include_filters:
-- tag:Name:
-  - 'master'
+filters:
+  tag:Name: master
 compose:
   ansible_host: public_ip_address

@@ -1,8 +1,8 @@
-- become: yes
-  hosts: master
+- hosts: all
   name: Docker-Install
+  become: yes
+  become_user: root
   tasks:
-
     - name: Wait for APT Lock
       shell:  while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 15; done;
     - name: kill apt lock
@@ -21,7 +21,10 @@
         - sudo
 
     - name: Proceed with installation
-      shell: bash /root/docker.sh
+      shell:
+        cmd: | 
+          curl -fsSL https://get.docker.com -o get-docker.sh 
+          bash get-docker.sh
       become: true
     - name: Change Docker CGroup to Systemd
       shell: 
