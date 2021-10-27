@@ -18,22 +18,59 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-
-resource "aws_instance" "web" {
+resource "aws_instance" "master" {
   count         = 1
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
-  key_name= "KeyPair-AWS"
+  key_name = "KeyPair-AWS"
 
 
   tags = {
-    Name = "WebServer"
+    Name = "master"
+    type = "ws"
   }
 
   provisioner "local-exec" {
 
-    command = "sleep 60 && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook playbook-starter.yml -i terraform.aws_ec2.yml -u ubuntu --key-file ~/.ssh/keypair-aws.pem" 
+    command = "sleep 60 && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook playbooks/master.yml -i terraform.aws_ec2.yml -u ubuntu --key-file ~/.ssh/keypair-aws.pem" 
 
   }
-
 }
+
+// resource "aws_instance" "web" {
+//   count         = 1
+//   ami           = data.aws_ami.ubuntu.id
+//   instance_type = "t2.micro"
+//   key_name= "KeyPair-AWS"
+
+
+//   tags = {
+//     Name = "ws"
+//     Name = "worker"
+//   }
+
+//   provisioner "local-exec" {
+
+//     command = "sleep 60 && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook playbook-starter.yml -i terraform.aws_ec2.yml -u ubuntu --key-file ~/.ssh/keypair-aws.pem" 
+
+//   }
+
+// }
+// resource "aws_instance" "db" {
+//   count         = 1
+//   ami           = data.aws_ami.ubuntu.id
+//   instance_type = "t2.micro"
+//   key_name = "KeyPair-AWS"
+
+
+//   tags = {
+//     Name = "db"
+//     Name = "worker"
+//   }
+
+//   provisioner "local-exec" {
+
+//     command = "sleep 60 && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook playbook-starter.yml -i terraform.aws_ec2.yml -u ubuntu --key-file ~/.ssh/keypair-aws.pem" 
+
+//   }
+// }

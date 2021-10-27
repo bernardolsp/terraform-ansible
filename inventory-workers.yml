@@ -3,6 +3,6 @@ regions:
   - us-east-1
 include_filters:
 - tag:Name:
-  - 'WebServer'
+  - 'master'
 compose:
   ansible_host: public_ip_address

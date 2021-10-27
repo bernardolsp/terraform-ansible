@@ -1,0 +1,73 @@
+- become: yes
+  hosts: master
+  name: Docker-Install
+  tasks:
+
+    - name: Wait for APT Lock
+      shell:  while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 15; done;
+    - name: kill apt lock
+      shell: rm -rf /var/lib/apt/lists/lock
+    - name: Update caches
+      apt: 
+        update_cache: yes      
+    - name: Install dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items: 
+        - apt-transport-https
+        - curl
+        - wget
+        - sudo
+
+    - name: Proceed with installation
+      shell: bash /root/docker.sh
+      become: true
+    - name: Change Docker CGroup to Systemd
+      shell: 
+        cmd: |
+          echo '{
+          "exec-opts": ["native.cgroupdriver=systemd"]
+          }' > /etc/docker/daemon.json
+
+    - name: Reboot host and wait for it to restart
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: whoami      
+
+    - name: Restart docker's service
+      shell: 
+        cmd: |
+          sudo systemctl restart docker
+            
+    - name: Install Kube-stuff
+      shell:
+        cmd: |
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+          $(lsb_release -cs) \
+          stable"
+
+          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+          sudo sed -i '/ swap / s/^/#/' /etc/fstab
+          sudo swapoff -a
+          cat << EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+          deb https://apt.kubernetes.io/ kubernetes-xenial main
+          EOF
+          ​
+          sudo apt update
+
+          sudo apt install -y docker-ce kubelet kubeadm kubectl
+
+
+    - name: Restart kubelet
+      service:
+        name: kubelet
+        daemon_reload: yes
+        state: restarted
+
+
